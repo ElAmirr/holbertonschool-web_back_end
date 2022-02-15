@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+1#!/usr/bin/env python3
 """ Module of Index views
 """
 from crypt import methods
@@ -29,10 +29,10 @@ def stats() -> str:
     return jsonify(stats)
 
 
-@app_views.route('/unauthorized', methods=['GET'], strict_slashes=False)
-def statuss() -> str:
+@app_views.route('/unauthorized', strict_slashes=False)
+def statuss():
   """ Get /api/v1/unauthorized
   Return:
-  -the status of the API
+  - Unauthorized message
   """
   abort(401)
