@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-add = __import__('0-add').add
+"""
+add function with annotations
+"""
 
-print(add(1.11, 2.22) == 1.11 + 2.22)
-print(add.__annotations__)
+
+def add(a: float, b: float) -> float:
+    """
+    returns the sum of two floats (a, b)
+    """
+    return a + b
