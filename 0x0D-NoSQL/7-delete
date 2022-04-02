@@ -1,0 +1,5 @@
+// deletes all documents with name="Holberton school"
+// check cheat sheet later: https://cheatography.com/isaeus/cheat-sheets/mongodb/
+db.school.deleteMany(
+    { "name": "Holberton school" }
+    )
