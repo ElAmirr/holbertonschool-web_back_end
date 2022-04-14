@@ -1,77 +1,22 @@
 'use strict';
-const request = require('request');
-const chai = require('chai');
+const express = require('express');
+const app = express();
+const port = 7865;
 
-describe('GET /', () => {
-  it('endpoint: GET /', (done) => {
-    const call = {
-      url: 'http://localhost:7865',
-      method: 'GET',
-    };
-    request(call, (error, response, body) => {
-      chai.expect(response.statusCode).to.equal(200);
-      chai.expect(body).to.equal('Welcome to the payment system');
-      done();
-    });
-  });
+app.get('/', (req, res) => res.end('Welcome to the payment system'))
+app.get('/cart/:id([0-9]+)', (req, res) => {
+  res.end(`Payment methods for cart ${req.params.id}`)
+})
+app.get('/available_payments', (req, res) => {
+  const obj = {
+    payment_methods: {
+      credit_cards: true,
+      paypal: false,
+    },
+  };
+  res.json(obj);
 });
-
-describe('GET /cart/:id', () => {
-  it('endpoint: GET /cart/:id', (done) => {
-    const call = {
-      url: 'http://localhost:7865/cart/12',
-      method: 'GET',
-    };
-    request(call, (error, response, body) => {
-      chai.expect(response.statusCode).to.equal(200);
-      chai.expect(body).to.equal('Payment methods for cart 12');
-      done();
-    });
-  });
+app.post('/login', (req, res) => {
+  res.end(`Welcome ${req.body.userName}`);
 });
-
-describe('GET /cart/:isNaN', () => {
-  it('endpoint: GET /cart/:isNaN', (done) => {
-    const call = {
-      url: 'http://localhost:7865/cart/anything',
-      method: 'GET',
-    };
-    request(call, (error, response, body) => {
-      chai.expect(response.statusCode).to.equal(404);
-      done();
-    });
-  });
-});
-
-describe('GET /available_payments', () => {
-  it('endpoint: GET /available_payments', (done) => {
-    const call = {
-      url: 'http://localhost:7865/available_payments',
-      method: 'GET',
-    };
-    request(call, (error, response, body) => {
-      chai.expect(response.statusCode).to.equal(200);
-      chai.expect(body).to.equal(
-        '{"payment_methods":{"credit_cards":true,"paypal":false}}'
-      );
-      done();
-    });
-  });
-});
-
-describe('POST /login', () => {
-  it('POST /login', (done) => {
-    const call = {
-      url: 'http://localhost:7865/login',
-      method: 'POST',
-      json: {
-        userName: 'Javi',
-      },
-    };
-    request(call, (error, response, body) => {
-      chai.expect(response.statusCode).to.equal(200);
-      chai.expect(body).to.equal('Welcome Javi');
-      done();
-    });
-  });
-});
+app.listen(port, () => console.log(`API available on localhost port ${port}`));
