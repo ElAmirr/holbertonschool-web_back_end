@@ -1,36 +1,30 @@
-from typing import TypeVar
-from models.user import User
+#!/usr/bin/env python3
+""" Basic Auth module for API authentication
+"""
+import base64
+from api.v1.auth.auth import Auth
 
 
-class BasicAuth:
-    """ Basic Auth class. """
-
-    def user_object_from_credentials(self, user_email: str, user_pwd: str) -> TypeVar('User'):
+class BasicAuth(Auth):
+    """ BasicAuth class that inherits from Auth
+    """
+    def decode_base64_authorization_header(self, base64_authorization_header: str) -> str:
         """
-        Returns the User instance based on email and password.
+        Decodes the Base64 string `base64_authorization_header`.
 
         Args:
-            user_email (str): The user's email.
-            user_pwd (str): The user's password.
+            base64_authorization_header (str): The Base64 string to decode.
 
         Returns:
-            User: The User instance if credentials are valid, otherwise None.
+            str: The decoded value as a UTF-8 string or None if invalid.
         """
-        if not user_email or not isinstance(user_email, str):
+        if base64_authorization_header is None or not isinstance(base64_authorization_header, str):
             return None
 
-        if not user_pwd or not isinstance(user_pwd, str):
+        try:
+            # Decode the Base64 string
+            decoded_bytes = base64.b64decode(base64_authorization_header)
+            # Convert bytes to UTF-8 string
+            return decoded_bytes.decode('utf-8')
+        except (base64.binascii.Error, UnicodeDecodeError):
             return None
-
-        # Look up user by email
-        user = User.search({'email': user_email})
-        if not user or len(user) == 0:
-            return None
-
-        user_instance = user[0]  # Assuming `search` returns a list
-
-        # Verify password
-        if not user_instance.is_valid_password(user_pwd):
-            return None
-
-        return user_instance
