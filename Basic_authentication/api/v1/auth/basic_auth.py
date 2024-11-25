@@ -1,25 +1,22 @@
-import base64
-
 class BasicAuth:
     """ Basic Auth class. """
 
-    def decode_base64_authorization_header(self, base64_authorization_header: str) -> str:
+    def extract_user_credentials(self, decoded_base64_authorization_header: str) -> (str, str):
         """
-        Decodes a Base64 string.
+        Extracts the user email and password from a Base64 decoded value.
 
         Args:
-            base64_authorization_header (str): Base64 encoded string.
+            decoded_base64_authorization_header (str): Decoded Base64 string.
 
         Returns:
-            str: Decoded UTF-8 string or None if decoding fails.
+            tuple: A tuple (email, password) if successful, otherwise (None, None).
         """
-        if not base64_authorization_header or not isinstance(base64_authorization_header, str):
-            return None
+        if not decoded_base64_authorization_header or not isinstance(decoded_base64_authorization_header, str):
+            return None, None
 
-        try:
-            # Decode Base64 string
-            decoded_bytes = base64.b64decode(base64_authorization_header, validate=True)
-            # Convert bytes to UTF-8 string
-            return decoded_bytes.decode('utf-8')
-        except (base64.binascii.Error, UnicodeDecodeError):
-            return None
+        if ':' not in decoded_base64_authorization_header:
+            return None, None
+
+        # Split at the first occurrence of ':'
+        user_credentials = decoded_base64_authorization_header.split(':', 1)
+        return user_credentials[0], user_credentials[1]
