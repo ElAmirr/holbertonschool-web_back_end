@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
-Module for filtering log messages.
-
-This module provides a function to obfuscate sensitive information
-in log messages based on given fields.
+Module for filtering sensitive data in log messages.
 """
 
 import re
@@ -12,16 +9,16 @@ from typing import List
 
 def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
     """
-    Obfuscates specified fields in a log message.
+    Obfuscates the values of specified fields in a log message.
 
     Args:
-        fields (List[str]): A list of strings representing fields to obfuscate.
-        redaction (str): The string to replace the field values with.
-        message (str): The log message to be obfuscated.
-        separator (str): The character separating fields in the log message.
+        fields (List[str]): Fields to obfuscate.
+        redaction (str): Redaction string.
+        message (str): Log message to be filtered.
+        separator (str): Separator in the log message.
 
     Returns:
-        str: The obfuscated log message.
+        str: Obfuscated log message.
     """
-    pattern = f"({'|'.join(fields)})=[^\\{separator}]*"
-    return re.sub(pattern, lambda m: f"{m.group(1)}={redaction}", message)
+    pattern = f"({'|'.join(fields)})=.*?{separator}"
+    return re.sub(pattern, lambda m: f"{m.group(1)}={redaction}{separator}", message)
