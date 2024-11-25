@@ -5,7 +5,9 @@ from flask import Flask, request, abort
 from flask_cors import CORS
 import os
 
+# Import the Auth classes
 from api.v1.auth.auth import Auth
+from api.v1.auth.basic_auth import BasicAuth
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +18,9 @@ auth = None
 # Load the correct authentication class based on the AUTH_TYPE environment variable
 auth_type = os.getenv('AUTH_TYPE')
 
-if auth_type == 'auth':
+if auth_type == 'basic_auth':
+    auth = BasicAuth()
+else:
     auth = Auth()
 
 # Method to handle before_request for request validation
