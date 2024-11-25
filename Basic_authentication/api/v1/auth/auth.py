@@ -29,11 +29,12 @@ class Auth:
 
     def authorization_header(self, request=None) -> str:
         """
-        Returns None, which simulates no authorization header.
+        Returns the value of the Authorization header if it exists, otherwise None.
         """
         if request is None:
             return None
-        return None
+        # Check if the Authorization header exists
+        return request.headers.get('Authorization', None)
 
     def current_user(self, request=None) -> None:
         """
