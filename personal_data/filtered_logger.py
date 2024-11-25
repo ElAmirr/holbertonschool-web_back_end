@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-""" Filtered Logger Module """
+"""
+Filtering log data module.
+
+This module provides a utility function for obfuscating sensitive fields
+in log messages.
+"""
+
 import re
 from typing import List
 
@@ -9,13 +15,13 @@ def filter_datum(fields: List[str], redaction: str, message: str, separator: str
     Obfuscates specified fields in a log message.
 
     Args:
-        fields: A list of strings representing fields to obfuscate.
-        redaction: The string to replace field values with.
-        message: The log line to be obfuscated.
-        separator: The character separating fields in the log line.
+        fields (List[str]): List of fields to obfuscate.
+        redaction (str): String to replace the field values with.
+        message (str): The log message to process.
+        separator (str): Separator character in the log message.
 
     Returns:
-        A string with specified fields obfuscated.
+        str: The obfuscated log message.
     """
-    pattern = f"({'|'.join(fields)})=[^{separator}]*"
-    return re.sub(pattern, lambda m: f"{m.group(1)}={redaction}", message)
+    pattern = r'(' + '|'.join(re.escape(field) for field in fields) + r')=[^' + re.escape(separator) + r']*'
+    return re.sub(pattern, lambda match: match.group(1) + '=' + redaction, message)
