@@ -9,33 +9,35 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# Initialize auth to None by default
 auth = None
 auth_type = os.getenv('AUTH_TYPE')
 
-# Initialize the Auth object based on AUTH_TYPE
+# Load the correct Auth instance based on AUTH_TYPE
 if auth_type == 'auth':
     auth = Auth()
 
 @app.before_request
 def before_request():
     """ Filter requests before they are processed """
+    # If auth is None, do nothing
     if auth is None:
         return
 
-    # Define the list of paths that don't require authentication
+    # List of paths that don't require authentication
     excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/']
     
-    # If the request path is in the excluded paths, no need to check authentication
+    # If the path is excluded, do nothing
     if request.path in excluded_paths:
         return
     
-    # Check if authentication is required for this path
+    # Check if authentication is required for the current path
     if auth.require_auth(request.path, excluded_paths):
-        # Check for authorization header
+        # If no Authorization header is present, abort with 401
         if auth.authorization_header(request) is None:
             abort(401, description="Unauthorized")
         
-        # Check for current user
+        # If current_user returns None, abort with 403
         if auth.current_user(request) is None:
             abort(403, description="Forbidden")
 

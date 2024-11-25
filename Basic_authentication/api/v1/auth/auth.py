@@ -2,14 +2,13 @@
 """ Auth module for API authentication
 """
 from flask import request
-from typing import List
 
 class Auth:
     """ Auth class to manage authentication
     """
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """ Method to check if authentication is required """
+        """ Determines whether authentication is required for the given path. """
         if path is None:
             return True
         if excluded_paths is None or len(excluded_paths) == 0:
@@ -21,7 +20,7 @@ class Auth:
         return True
 
     def authorization_header(self, request=None) -> str:
-        """ Returns the value of the Authorization header if present """
+        """ Returns the value of the Authorization header if present, otherwise None """
         if request is None:
             return None
         return request.headers.get('Authorization', None)
