@@ -1,22 +1,36 @@
+from typing import TypeVar
+from models.user import User
+
+
 class BasicAuth:
     """ Basic Auth class. """
 
-    def extract_user_credentials(self, decoded_base64_authorization_header: str) -> (str, str):
+    def user_object_from_credentials(self, user_email: str, user_pwd: str) -> TypeVar('User'):
         """
-        Extracts the user email and password from a Base64 decoded value.
+        Returns the User instance based on email and password.
 
         Args:
-            decoded_base64_authorization_header (str): Decoded Base64 string.
+            user_email (str): The user's email.
+            user_pwd (str): The user's password.
 
         Returns:
-            tuple: A tuple (email, password) if successful, otherwise (None, None).
+            User: The User instance if credentials are valid, otherwise None.
         """
-        if not decoded_base64_authorization_header or not isinstance(decoded_base64_authorization_header, str):
-            return None, None
+        if not user_email or not isinstance(user_email, str):
+            return None
 
-        if ':' not in decoded_base64_authorization_header:
-            return None, None
+        if not user_pwd or not isinstance(user_pwd, str):
+            return None
 
-        # Split at the first occurrence of ':'
-        user_credentials = decoded_base64_authorization_header.split(':', 1)
-        return user_credentials[0], user_credentials[1]
+        # Look up user by email
+        user = User.search({'email': user_email})
+        if not user or len(user) == 0:
+            return None
+
+        user_instance = user[0]  # Assuming `search` returns a list
+
+        # Verify password
+        if not user_instance.is_valid_password(user_pwd):
+            return None
+
+        return user_instance
