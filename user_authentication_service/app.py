@@ -5,7 +5,7 @@ Basic Flask app with user registration
 from flask import Flask, jsonify, request
 from auth import Auth
 
-# Initialize Auth class
+# Initialize the Auth class
 AUTH = Auth()
 
 # Create a Flask instance
@@ -23,14 +23,18 @@ def register_user():
     """
     Endpoint to register a new user.
     """
+    # Ensure email and password are provided in the form data
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    if not email or not password:
+        # If either email or password is missing, return an error response
+        return jsonify({"message": "email and password required"}), 400
+
     try:
-        # Extract email and password from form data
-        email = request.form.get("email")
-        password = request.form.get("password")
-        
         # Attempt to register the user using the Auth class
         user = AUTH.register_user(email, password)
-        
+
         # Return a successful JSON response with user email
         return jsonify({"email": user.email, "message": "user created"}), 200
 
