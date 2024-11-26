@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Basic Flask app with user registration
-"""
 from flask import Flask, request, jsonify, abort, make_response
 from auth import Auth
 import uuid
