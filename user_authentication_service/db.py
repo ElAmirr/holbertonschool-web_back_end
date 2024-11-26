@@ -3,9 +3,9 @@
 DB module
 """
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm.exc import NoResultFound
 from user import Base, User
 
 
@@ -14,17 +14,14 @@ class DB:
     """
 
     def __init__(self) -> None:
-        """Initialize a new DB instance
-        """
-        self._engine = create_engine("sqlite:///a.db", echo=True)
-        Base.metadata.drop_all(self._engine)
+        """Initialize a new DB instance"""
+        self._engine = create_engine("sqlite:///a.db", echo=False)
         Base.metadata.create_all(self._engine)
         self.__session = None
 
     @property
     def _session(self) -> Session:
-        """Memoized session object
-        """
+        """Memoized session object"""
         if self.__session is None:
             DBSession = sessionmaker(bind=self._engine)
             self.__session = DBSession()
@@ -45,3 +42,27 @@ class DB:
         self._session.add(new_user)
         self._session.commit()
         return new_user
+
+    def find_user_by(self, **kwargs) -> User:
+        """
+        Find a user by arbitrary keyword arguments.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments to filter the query.
+
+        Returns:
+            User: The first user that matches the criteria.
+
+        Raises:
+            NoResultFound: If no user matches the criteria.
+            InvalidRequestError: If invalid query arguments are provided.
+        """
+        if not kwargs:
+            raise InvalidRequestError("No arguments provided for query.")
+        try:
+            user = self._session.query(User).filter_by(**kwargs).one()
+            return user
+        except NoResultFound:
+            raise NoResultFound("No user found with the provided criteria.")
+        except Exception as e:
+            raise InvalidRequestError(f"Invalid query arguments: {kwargs}. Error: {str(e)}")
