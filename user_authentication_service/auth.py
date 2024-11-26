@@ -1,42 +1,44 @@
-#!/usr/bin/env python3
-"""
-Auth class to handle user authentication
-"""
+import uuid
+import bcrypt
 from db import DB
-from bcrypt import hashpw, checkpw, gensalt
 from user import User
+
 
 class Auth:
     """Auth class to interact with the authentication database."""
-
+    
     def __init__(self):
-        """Initialize Auth object."""
         self._db = DB()
 
+    def _generate_uuid(self) -> str:
+        """Generates and returns a new UUID as a string."""
+        return str(uuid.uuid4())
+
+    def _hash_password(self, password: str) -> bytes:
+        """Hashes the password with bcrypt and returns the salted hash."""
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed_password
+
     def register_user(self, email: str, password: str) -> User:
-        """Registers a user by storing the email and hashed password."""
-        hashed_password = _hash_password(password)
+        """Registers a new user by hashing the password and saving the user."""
+        # Check if the user already exists
         try:
-            user = self._db.add_user(email, hashed_password)
-            return user
-        except ValueError:
+            self._db.find_user_by(email=email)
             raise ValueError(f"User {email} already exists")
+        except NoResultFound:
+            hashed_password = self._hash_password(password)
+            user_id = self._generate_uuid()
+            user = User(id=user_id, email=email, hashed_password=hashed_password)
+            self._db.add_user(email, hashed_password)
+            return user
 
     def valid_login(self, email: str, password: str) -> bool:
-        """Validates user credentials by checking the password."""
+        """Validates user login credentials."""
         try:
-            # Locate the user by email
             user = self._db.find_user_by(email=email)
-
-            # Check if the password matches the stored hashed password
-            if checkpw(password.encode('utf-8'), user.hashed_password.encode('utf-8')):
+            if bcrypt.checkpw(password.encode('utf-8'), user.hashed_password):
                 return True
-            return False
         except NoResultFound:
-            return False
-        except InvalidRequestError:
-            return False
-
-def _hash_password(password: str) -> str:
-    """Hashes a password using bcrypt."""
-    return hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
+            pass
+        return False
