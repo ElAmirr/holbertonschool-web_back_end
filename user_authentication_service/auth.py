@@ -1,44 +1,12 @@
 import uuid
-import bcrypt
-from db import DB
-from user import User
-
 
 class Auth:
     """Auth class to interact with the authentication database."""
     
     def __init__(self):
-        self._db = DB()
-
+        # Initialize any necessary variables or database connections
+        pass
+    
     def _generate_uuid(self) -> str:
         """Generates and returns a new UUID as a string."""
         return str(uuid.uuid4())
-
-    def _hash_password(self, password: str) -> bytes:
-        """Hashes the password with bcrypt and returns the salted hash."""
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed_password
-
-    def register_user(self, email: str, password: str) -> User:
-        """Registers a new user by hashing the password and saving the user."""
-        # Check if the user already exists
-        try:
-            self._db.find_user_by(email=email)
-            raise ValueError(f"User {email} already exists")
-        except NoResultFound:
-            hashed_password = self._hash_password(password)
-            user_id = self._generate_uuid()
-            user = User(id=user_id, email=email, hashed_password=hashed_password)
-            self._db.add_user(email, hashed_password)
-            return user
-
-    def valid_login(self, email: str, password: str) -> bool:
-        """Validates user login credentials."""
-        try:
-            user = self._db.find_user_by(email=email)
-            if bcrypt.checkpw(password.encode('utf-8'), user.hashed_password):
-                return True
-        except NoResultFound:
-            pass
-        return False
