@@ -4,13 +4,13 @@ import unittest
 from typing import Dict, Tuple, Any
 from utils import access_nested_map  # Import the actual function you're testing
 
-
 class TestAccessNestedMap(unittest.TestCase):
     """
     Test case for the access_nested_map function.
     
     This test case verifies that the access_nested_map function correctly retrieves
-    values from nested dictionaries based on the given path.
+    values from nested dictionaries based on the given path. It also tests for proper
+    exception handling when accessing invalid keys.
     """
 
     @parameterized.expand([
@@ -20,7 +20,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map(self, nested_map: Dict[str, Any], path: Tuple[str], expected: Any) -> None:
         """
-        Test the access_nested_map function with various inputs.
+        Test the access_nested_map function with various inputs to ensure it retrieves
+        the correct value from a nested dictionary based on the provided path.
         
         Args:
             nested_map: The dictionary to search in.
@@ -35,7 +36,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map_exception(self, nested_map: Dict[str, Any], path: Tuple[str], expected_message: str) -> None:
         """
-        Test that a KeyError is raised when the path is invalid.
+        Test that a KeyError is raised when the path is invalid and verifies that the exception message
+        is as expected.
         
         Args:
             nested_map: The dictionary to search in.
