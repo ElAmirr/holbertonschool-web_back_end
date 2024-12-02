@@ -4,13 +4,13 @@ import unittest
 from typing import Dict, Tuple, Any
 from utils import access_nested_map  # Import the actual function you're testing
 
-
 class TestAccessNestedMap(unittest.TestCase):
     """
     Test case for the access_nested_map function.
     
     This test case verifies that the access_nested_map function correctly retrieves
-    values from nested dictionaries based on the given path.
+    values from nested dictionaries based on the given path. It also tests for proper
+    exception handling when accessing invalid keys.
     """
 
     @parameterized.expand([
@@ -20,7 +20,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map(self, nested_map: Dict[str, Any], path: Tuple[str], expected: Any) -> None:
         """
-        Test the access_nested_map function with various inputs.
+        Test the access_nested_map function with various inputs to ensure it retrieves
+        the correct value from a nested dictionary based on the provided path.
         
         Args:
             nested_map: The dictionary to search in.
@@ -28,6 +29,25 @@ class TestAccessNestedMap(unittest.TestCase):
             expected: The expected result that should be returned by the function.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
+
+    @parameterized.expand([
+        ({}, ("a",), "Key not found: a"),  # Test for empty dictionary with invalid path
+        ({"a": 1}, ("a", "b"), "Key not found: b")  # Test for path with missing key in a nested structure
+    ])
+    def test_access_nested_map_exception(self, nested_map: Dict[str, Any], path: Tuple[str], expected_message: str) -> None:
+        """
+        Test that a KeyError is raised when the path is invalid and verifies that the exception message
+        is as expected.
+        
+        Args:
+            nested_map: The dictionary to search in.
+            path: The path to access the value in the dictionary.
+            expected_message: The expected exception message.
+        """
+        with self.assertRaises(KeyError) as cm:
+            access_nested_map(nested_map, path)
+        
+        self.assertEqual(str(cm.exception), expected_message)
 
 
 if __name__ == '__main__':
