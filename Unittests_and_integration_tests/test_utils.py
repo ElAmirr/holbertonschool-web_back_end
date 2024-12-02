@@ -1,52 +1,53 @@
 #!/usr/bin/env python3
+"""
+Unit tests for utils module.
+"""
+
 from parameterized import parameterized
 import unittest
-from typing import Dict, Tuple, Any
-from utils import access_nested_map  # Import the actual function you're testing
+from typing import Mapping, Sequence, Any, Dict
+from utils import access_nested_map
+
 
 class TestAccessNestedMap(unittest.TestCase):
     """
     Test case for the access_nested_map function.
     
-    This test case verifies that the access_nested_map function correctly retrieves
-    values from nested dictionaries based on the given path. It also tests for proper
-    exception handling when accessing invalid keys.
+    Verifies correct value retrieval from nested dictionaries
+    and raises KeyError for invalid paths.
     """
 
     @parameterized.expand([
-        ({"a": 1}, ("a",), 1),  # Test for simple dictionary with direct access
-        ({"a": {"b": 2}}, ("a",), {"b": 2}),  # Test for nested dictionary with first key access
-        ({"a": {"b": 2}}, ("a", "b"), 2)  # Test for nested dictionary with second key access
+        ({"a": 1}, ("a",), 1),  # Test single key access
+        ({"a": {"b": 2}}, ("a",), {"b": 2}),  # Test nested access, first key
+        ({"a": {"b": 2}}, ("a", "b"), 2),  # Test nested access, second key
     ])
-    def test_access_nested_map(self, nested_map: Dict[str, Any], path: Tuple[str], expected: Any) -> None:
+    def test_access_nested_map(self, nested_map: Mapping, path: Sequence, expected: Any) -> None:
         """
-        Test the access_nested_map function with various inputs to ensure it retrieves
-        the correct value from a nested dictionary based on the provided path.
+        Test valid paths for access_nested_map.
         
         Args:
             nested_map: The dictionary to search in.
-            path: The path to access the value in the dictionary.
-            expected: The expected result that should be returned by the function.
+            path: The sequence of keys to navigate.
+            expected: The expected result of the function.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
-        ({}, ("a",), "Key not found: a"),  # Test for empty dictionary with invalid path
-        ({"a": 1}, ("a", "b"), "Key not found: b")  # Test for path with missing key in a nested structure
+        ({}, ("a",), "KeyError: 'a'"),  # Test missing key in empty dict
+        ({"a": 1}, ("a", "b"), "KeyError: 'b'"),  # Test invalid nested key
     ])
-    def test_access_nested_map_exception(self, nested_map: Dict[str, Any], path: Tuple[str], expected_message: str) -> None:
+    def test_access_nested_map_exception(self, nested_map: Mapping, path: Sequence, expected_message: str) -> None:
         """
-        Test that a KeyError is raised when the path is invalid and verifies that the exception message
-        is as expected.
+        Test invalid paths for access_nested_map to ensure KeyError is raised.
         
         Args:
             nested_map: The dictionary to search in.
-            path: The path to access the value in the dictionary.
-            expected_message: The expected exception message.
+            path: The sequence of keys to navigate.
+            expected_message: The expected KeyError message.
         """
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
-        
         self.assertEqual(str(cm.exception), expected_message)
 
 
