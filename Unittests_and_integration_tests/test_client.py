@@ -3,7 +3,7 @@
 Unit tests for the client module.
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
 from client import GithubOrgClient
 
@@ -38,14 +38,18 @@ class TestGithubOrgClient(unittest.TestCase):
         Test GithubOrgClient.public_repos method.
         Mock get_json and _public_repos_url to return predefined values.
         """
-        # Mock data for the test
+        # Mock data
         org_name = "google"
-        repos_payload = [{"name": "repo1"}, {"name": "repo2"}]
-        expected_repos = ["repo1", "repo2"]
+        repos_payload = [
+            {"name": "repo1"},
+            {"name": "repo2"},
+            {"name": "repo3"}
+        ]
+        expected_repos = ["repo1", "repo2", "repo3"]
         expected_url = f"https://api.github.com/orgs/{org_name}/repos"
 
         # Use patch to mock the _public_repos_url property
-        with patch.object(GithubOrgClient, "_public_repos_url", new_callable=property) as mock_repos_url:
+        with patch.object(GithubOrgClient, "_public_repos_url", new_callable=PropertyMock) as mock_repos_url:
             mock_repos_url.return_value = expected_url
             mock_get_json.return_value = repos_payload
 
