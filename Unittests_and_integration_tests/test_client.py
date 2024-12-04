@@ -1,38 +1,34 @@
-# test_client.py
+#!/usr/bin/env python3
+"""
+Unit tests for the client module.
+"""
 import unittest
-from unittest.mock import patch, Mock
-from client import GithubOrgClient  # Assuming GithubOrgClient is in the client module
+from unittest.mock import patch, PropertyMock
+from client import GithubOrgClient
+
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test cases for the GithubOrgClient class."""
+    """Test cases for GithubOrgClient."""
 
-    @patch("client.GithubOrgClient.get_json")
-    @patch("client.GithubOrgClient._public_repos_url", return_value="https://api.github.com/orgs/google/repos")
-    def test_public_repos(self, mock_public_repos_url, mock_get_json):
-        """Test that the public_repos method returns the expected list of repos."""
+    @patch("client.GithubOrgClient.org", new_callable=PropertyMock)
+    def test_public_repos_url(self, mock_org):
+        """
+        Test GithubOrgClient._public_repos_url.
+        Mock the org property to return a known payload.
+        """
+        # Mock the org property to return a specific dictionary
+        mock_org.return_value = {"repos_url": "https://api.github.com/orgs/test_org/repos"}
 
-        # Define the mock payload to be returned by get_json
-        mock_payload = [
-            {"name": "repo1"},
-            {"name": "repo2"},
-            {"name": "repo3"}
-        ]
-        mock_get_json.return_value = mock_payload
+        # Create an instance of GithubOrgClient
+        client = GithubOrgClient("test_org")
 
-        # Create an instance of GithubOrgClient with a mock organization name
-        client = GithubOrgClient("google")
+        # Call the _public_repos_url property
+        result = client._public_repos_url
 
-        # Call the public_repos method
-        repos = client.public_repos()
+        # Assertions
+        self.assertEqual(result, "https://api.github.com/orgs/test_org/repos")
+        mock_org.assert_called_once()
 
-        # Test that the public_repos method returns the expected list of repo names
-        self.assertEqual(repos, ["repo1", "repo2", "repo3"])
-
-        # Ensure that the _public_repos_url property was accessed once
-        mock_public_repos_url.assert_called_once()
-
-        # Ensure that get_json was called once with the correct URL
-        mock_get_json.assert_called_once_with("https://api.github.com/orgs/google/repos")
 
 if __name__ == "__main__":
     unittest.main()
