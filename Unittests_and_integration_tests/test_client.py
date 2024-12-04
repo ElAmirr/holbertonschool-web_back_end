@@ -1,54 +1,37 @@
+#!/usr/bin/env python3
+"""
+Unit tests for the client module.
+"""
 import unittest
 from unittest.mock import patch
-from parameterized import parameterized_class
-from client import GithubOrgClient  # Ensure to import the actual class from the client module
-import fixtures
+from parameterized import parameterized
+from client import GithubOrgClient
 
-@parameterized_class([
-    {"org_payload": fixtures.org_payload, "repos_payload": fixtures.repos_payload,
-     "expected_repos": fixtures.expected_repos, "apache2_repos": fixtures.apache2_repos}
-])
-class TestIntegrationGithubOrgClient(unittest.TestCase):
-    
-    @classmethod
-    def setUpClass(cls):
-        cls.get_patcher = patch('requests.get')
 
-        # Start the patcher
-        cls.mock_get = cls.get_patcher.start()
+class TestGithubOrgClient(unittest.TestCase):
+    """Test cases for GithubOrgClient."""
 
-        # Mock the return values based on URL
-        cls.mock_get.side_effect = lambda url: cls._mock_get_response(url)
+    @parameterized.expand([
+        ("google", {"login": "google"}),
+        ("abc", {"login": "abc"})
+    ])
+    @patch("client.get_json")
+    def test_org(self, org_name, expected, mock_get_json):
+        """
+        Test GithubOrgClient.org method.
+        Mock the get_json function to avoid actual HTTP calls.
+        """
+        # Set up the mock to return the expected data
+        mock_get_json.return_value = expected
 
-    @classmethod
-    def _mock_get_response(cls, url):
-        if url == "https://api.github.com/orgs/test_org":
-            return cls.MockResponse(cls.org_payload)
-        elif url == "https://api.github.com/orgs/test_org/repos":
-            return cls.MockResponse(cls.repos_payload)
-        return cls.MockResponse(None, status=404)
+        # Create an instance of GithubOrgClient and call the org method
+        client = GithubOrgClient(org_name)
+        result = client.org
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.get_patcher.stop()
+        # Assertions
+        self.assertEqual(result, expected)
+        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
 
-    class MockResponse:
-        def __init__(self, json_data, status=200):
-            self.json_data = json_data
-            self.status_code = status
 
-        def json(self):
-            return self.json_data
-
-    def test_public_repos(self):
-        client = GithubOrgClient("test_org")
-        repos = client.public_repos()
-        self.assertEqual(repos, self.expected_repos)
-
-    def test_public_repos_with_license(self):
-        client = GithubOrgClient("test_org")
-        repos = client.public_repos(license_key="apache-2.0")
-        self.assertEqual(repos, self.apache2_repos)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
